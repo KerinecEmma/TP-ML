@@ -8,7 +8,6 @@ import numpy as np
 #absolument se referer a l'alorithme du cours
 
 
-
 def adaboost(x, S, t, L): #learning sample S, number of iterations t, weak learner L. 
 	m= len(S)
 	d= np.zeros((t, m))
@@ -25,11 +24,11 @@ def adaboost(x, S, t, L): #learning sample S, number of iterations t, weak learn
 			if (y[z]!= h[i][z]):
 				e[i]=+d[i][z]
 
-		a[i]=1/2 np.log((1-e[i])/e[i])
+		a[i]=1/2 * np.log((1-e[i])/e[i])
 
 		z=0
 		for j in range(1, m):
-			d[i+1][j]=d[i][j]*exp(a[j]*y[i]*h[j][i]))
+			d[i+1][j]=d[i][j]*exp(a[j]*y[i]*h[j][i])
 			z=z+d[i+1][j]
 		for j in range(1,m): 
 			d[i+1][j]=d[i+1][j]/z
