@@ -5,7 +5,8 @@ from sklearn.datasets import make_classification
 from sklearn.datasets import load_iris
 from sklearn.datasets import load_digits
 from sklearn.datasets import make_gaussian_quantiles
-
+import random
+from sklearn.model_selection import KFold
 
 def generate_classi(N):
 	#random_state is optional, it is a seed
