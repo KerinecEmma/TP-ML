@@ -1,4 +1,3 @@
-
 from sklearn.datasets import make_classification
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
