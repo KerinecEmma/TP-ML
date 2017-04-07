@@ -45,7 +45,7 @@ def main():
 	if args.algorithm=="kNN":
 		model=kNN
 
-	elif args.aglorithm=="Adaboost":
+	elif args.algorithm=="Adaboost":
 		model=ababoost
 
 	elif args.algorithm=="SVM":
