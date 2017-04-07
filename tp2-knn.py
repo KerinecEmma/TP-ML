@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -​*- coding: utf-8 -*​-
-
 from sklearn.datasets import make_classification
 from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt

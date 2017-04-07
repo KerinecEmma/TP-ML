@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -​*- coding: utf-8 -*​-
 
 from sklearn.datasets import make_classification
@@ -6,8 +6,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-
 """pas du tout fini, faire les structures, comprendre m, Z..."""
+
+
+def e(S, t, L, n):
+	
+
 
 def adaboost(S, t, L):
 	m=len(S)
@@ -15,7 +19,7 @@ def adaboost(S, t, L):
 		d[1][i]=1/m
 	for i in range(1, t):
 		h[i]=L(S,D[i]
-		e[i]=
+		e[i]=e(S, t, L, i)
 		"""fonction a implementer"""
 		a[i]=1/2 np.log((1-e[i])/e[i])
 		for j in range(1, m):
