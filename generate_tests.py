@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import generate_tests
 from sklearn.datasets import make_moons
+from sklearn.datasets import make_circles
 from sklearn.datasets import make_classification
 from sklearn.datasets import load_iris
 from sklearn.datasets import load_digits
