@@ -1,7 +1,7 @@
 MAINFILE=main
 
 all: $(MAINFILE).py
-	python3 $^ circle Adaboost -n 100
+	python3 $^ circle kNN -n 100
 
 
 
