@@ -6,8 +6,11 @@ from sklearn.datasets import make_classification
 from sklearn.datasets import load_iris
 from sklearn.datasets import load_digits
 from sklearn.datasets import make_gaussian_quantiles
+from sklearn.preprocessing import StandardScaler
 import random
 from sklearn.model_selection import KFold
+import numpy as np
+import csv
 
 def generate_classi(N):
 	#random_state is optional, it is a seed
@@ -30,3 +33,23 @@ def generate_iris():
 
 def generate_digits():
 	return load_digits(return_X_y=True)
+
+def generate_ozone():
+
+	data = csv.reader(open('ozone.dat'))
+	X=np.array([])
+	y=[]
+	# Aix = 1 0 0 0 0
+	# Als = 0 1 0 0 0
+	# Cad = 0 0 1 0 0
+	# Ram = 0 0 0 1 0
+	# Pla = 0 0 0 0 1
+	for row in data:
+		try :
+			X=np.append(X, np.array(([float(row[i]) for i in [0,2,3,4,5,6,7,8,9,10,11,12,13]])))
+			y+=[1] if float(row[1])>=150 else [-1]
+		except ValueError:
+			pass
+	X=X.reshape(13,1041)
+	X=X.transpose()
+	return StandardScaler().fit_transform(X), np.array(y)

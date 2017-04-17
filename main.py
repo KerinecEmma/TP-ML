@@ -6,6 +6,7 @@ import argparse
 import sklearn
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
+from sklearn.svm import SVC
 import math
 from tp2_knn import *
 from tp2_boosting import *
@@ -35,16 +36,17 @@ def show_scores(X, X_test, y_test, X_train, y_train, Y_learn_Pyth, Y_learn_Keri,
 	sub1.axis([x_min,x_max,y_min,y_max])
 
 
-	sub2.plot()
-	grid=np.c_[xx.ravel(),yy.ravel()]
-	Z2d=[]
-	for i in range(len(grid)):
-		Z2d+=[ker_learn.predict(grid[i])]
-	Z2d=np.array(Z2d).reshape(xx.shape)
-	sub2.pcolormesh(xx,yy,Z2d, cmap=plt.cm.Paired)
-	sub2.scatter(X_graph, Y_graph, c=Y_learn_Keri, cmap=plt.cm.coolwarm)
-	sub2.set_title("Our implementation")
-	sub2.axis([x_min,x_max,y_min,y_max])
+	if ker_learn!=None :
+		sub2.plot()
+		grid=np.c_[xx.ravel(),yy.ravel()]
+		Z2d=[]
+		for i in range(len(grid)):
+			Z2d+=[ker_learn.predict(grid[i])]
+		Z2d=np.array(Z2d).reshape(xx.shape)
+		sub2.pcolormesh(xx,yy,Z2d, cmap=plt.cm.Paired)
+		sub2.scatter(X_graph, Y_graph, c=Y_learn_Keri, cmap=plt.cm.coolwarm)
+		sub2.set_title("Our implementation")
+		sub2.axis([x_min,x_max,y_min,y_max])
 
 
 	sub3.plot()
@@ -65,8 +67,9 @@ def show_scores(X, X_test, y_test, X_train, y_train, Y_learn_Pyth, Y_learn_Keri,
 
 def main():
 	parser = argparse.ArgumentParser(description='Machine Learning - TP2')
-	parser.add_argument("dataset", type=str, choices=["classi","gauss","moon","circle","iris","digits"])
+	parser.add_argument("dataset", type=str, choices=["classi","gauss","moon","circle","iris","digits","ozone"])
 	parser.add_argument("-n", metavar="N", type=int)
+	parser.add_argument("-print", action='store_const', const=1,)
 	parser.add_argument("algorithm", type=str, choices=["kNN", "Adaboost", "SVM"])
 	args = parser.parse_args()
 
@@ -93,15 +96,18 @@ def main():
 	elif args.dataset=="iris":
 		X, y=gtest.generate_iris()
 
+	elif args.dataset=="ozone":
+		X, y=gtest.generate_ozone()
 
+
+	kf=sklearn.model_selection.KFold(n_splits=5,shuffle=True) #creation of the k-folds
+	scoresKeri=[]
+	scoresPyth=[]
+	tot=[]
 
 	## Running algorithms
-	if args.algorithm=="kNN":
-		kf=sklearn.model_selection.KFold(n_splits=10,shuffle=True) #creation of the k-folds
-		scoresKeri=[]
-		scoresPyth=[]
-		
-		for k in range(1,math.floor(0.75*num_ex),5):
+	if args.algorithm=="kNN":		
+		for k in range(1,math.floor(0.75*num_ex)):
 			for learn,test in kf.split(X):
 				X_train=X[learn]
 				y_train=y[learn]
@@ -110,30 +116,30 @@ def main():
 				Y_learn_Keri=y_test.copy()
 				Y_learn_Pyth=y_test.copy()
 				neigh = KNeighborsClassifier(n_neighbors=k)
-				train=[(X_train[i,:], y_train[i]) for i in range(len(X_train))]
+				train=[(X_train[i], y_train[i]) for i in range(len(X_train))]
 				ker_neig = kNN(k, train, d)
 				neigh.fit(X_train, np.ravel(y_train.reshape(-1,1)))
 				score=0
 				score1=0
+				tpt=0
 				for i in range(len(X_test)):
 					Y_learn_Pyth[i]=neigh.predict(X_test[i].reshape(1,-1))
 					Y_learn_Keri[i]=ker_neig.predict(X_test[i])
+					tpt+=1
 					score+=Y_learn_Pyth[i]==y_test[i]
 					score1+=Y_learn_Keri[i]==y_test[i]
-			scoresKeri.append(score)
-			scoresPyth.append(score1)
-			show_scores(X, X_test, y_test, X_train, y_train, Y_learn_Pyth, Y_learn_Keri, neigh, ker_neig)
+			scoresKeri.append(score1)
+			scoresPyth.append(score)
+			tot.append(tpt)
+			if args.print:
+				show_scores(X, X_test, y_test, X_train, y_train, Y_learn_Pyth, Y_learn_Keri, neigh, ker_neig)
 
 		#Outputs
 		for i in range(len(scoresKeri)):
-			print("kNN with k = {}, Emma has {} right vs Python {}".format(5*i+1,scoresKeri[i],scoresPyth[i]))
+			print("kNN with k = {}, Emma has {} right vs Python {}".format(5*i+1,scoresKeri[i]/tot[i],scoresPyth[i]/tot[i]))
 
 	elif args.algorithm=="Adaboost":
-		kf=sklearn.model_selection.KFold(n_splits=10,shuffle=True) #creation of the k-folds
-		scoresKeri=[]
-		scoresPyth=[]
-
-		for k in range(1,math.floor(0.75*num_ex),5):
+		for k in range(1,math.floor(0.75*num_ex)):
 			for learn,test in kf.split(X):
 				X_train=X[learn]
 				y_train=y[learn]
@@ -147,23 +153,52 @@ def main():
 				adaker=Adaboost(X_train, y_train, k)
 				score=0
 				score1=0
+				tpt=0
 				for i in range(len(X_test)):
 					Y_learn_Pyth[i]=ada.predict(X_test[i].reshape(1,-1))
 					Y_learn_Keri[i]=adaker.predict(X_test[i])
 					score+=Y_learn_Pyth[i]==y_test[i]
 					score1+=Y_learn_Keri[i]==y_test[i]
-			scoresKeri.append(score)
-			scoresPyth.append(score1)
-			show_scores(X, X_test, y_test, X_train, y_train, Y_learn_Pyth, Y_learn_Keri, ada, adaker)
+					tpt+=1
+			scoresKeri.append(score1)
+			scoresPyth.append(score)
+			tot.append(tpt)
+			if args.print:
+				show_scores(X, X_test, y_test, X_train, y_train, Y_learn_Pyth, Y_learn_Keri, ada, adaker)
 
 			
 
 		#Outputs
 		for i in range(len(scoresKeri)):
-			print("Adaboost with n = {}, Emma has {} right vs Python {}".format(5*i+1,scoresKeri[i],scoresPyth[i]))
+			print("Adaboost with n = {}, Emma has {} right vs Python {}".format(5*i+1,scoresKeri[i]/tot[i],scoresPyth[i]/tot[i]))
 
 	elif args.algorithm=="SVM":
-		model=SVM
+		kernel=[ "linear", "poly", "rbf", "sigmoid"]
+		for c in [0.4, 0.6, 0.8, 1, 1.5 , 2]:
+			scoresPyth=[]
+			tot=[]
+			for k in kernel:
+				for learn,test in kf.split(X):
+					X_train=X[learn]
+					y_train=y[learn]
+					X_test=X[test]
+					y_test=y[test]
+					Y_learn_Pyth=y_test.copy()
+					svm = sklearn.svm.SVC(kernel=k, C=c)
+					svm.fit(X_train, np.ravel(y_train.reshape(-1,1)))
+					score=0
+					tpt=0
+					for i in range(len(X_test)):
+						Y_learn_Pyth[i]=svm.predict(X_test[i].reshape(1,-1))
+						score+=Y_learn_Pyth[i]==y_test[i]
+						tpt+=1
+				scoresPyth.append(score)
+				tot.append(tpt)
+				if args.print:
+					show_scores(X, X_test, y_test, X_train, y_train, Y_learn_Pyth, None, svm, None)
+
+			for i in range(len(scoresPyth)):
+				print("SVM with kernel = {} and c ={}, Python has {} number of right entries".format(kernel[i], c,scoresPyth[i]/tot[i]))
 
 	input("Press Enter to continue...")
 

@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from math import sqrt
 
-def d(x,y):	
-	"""fonction de distance, prend deux donnees"""
-	return((x[0]-y[0])**2 + (x[1]-y[1])**2)
+def d(x,y):
+	out=(x-y)**2
+	return out.sum()
 
 class kNN:
 	def __init__(self, k, S, dist = d):

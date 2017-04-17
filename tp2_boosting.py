@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 class Adaboost :
 	def __init__(self, X_train, y_train, T):
-		T+=1
+		self._T=T
 		for i in range(len(y_train)):
 			if y_train[i]==0:
 				y_train[i]=-1
@@ -28,9 +28,11 @@ class Adaboost :
 				if (y_train[i] != h[t].predict(X_train[i].reshape(1,-1))):
 					e+=d[i]
 
-			if e>0.5:
+			if e>0.5 or e == 0:
+				self._T=t
 				break
-			a[t]=math.log((1-e)/e)/2
+			else:
+				a[t]=math.log((1-e)/e)/2
 
 			z=0
 			for i in range(m):
@@ -41,7 +43,6 @@ class Adaboost :
 				d[i]= d[i]/z
 		self._a=a
 		self._h=h
-		self._T=T
 
 	def predict(self, x):
 		f=0
